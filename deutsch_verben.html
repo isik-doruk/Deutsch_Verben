@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deutsch Verben Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --card: #1a1916;
+    --border: #2e2c28;
+    --ink: #f0ead6;
+    --ink-dim: #8a8270;
+    --accent: #e8c547;
+    --green: #6bcf7f;
+    --red: #e86f6f;
+    --blue: #7eb8f7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,197,71,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,197,71,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 560px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+
+  .header h1 em {
+    color: var(--ink-dim);
+    font-style: italic;
+    font-size: 1.1rem;
+    display: block;
+    margin-top: 4px;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    margin-bottom: 24px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--ink-dim);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.4s ease;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.4;
+  }
+
+  .attempt-badge {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink-dim);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 8px;
+  }
+
+  .attempt-badge.second {
+    color: var(--red);
+    border-color: var(--red);
+    opacity: 0.7;
+  }
+
+  /* Verb display */
+  .verb-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--ink-dim);
+    margin-bottom: 8px;
+  }
+
+  .verb-main {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3rem;
+    color: var(--ink);
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+
+  .kasus-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--blue);
+    border: 1px solid rgba(126, 184, 247, 0.3);
+    border-radius: 4px;
+    padding: 3px 8px;
+    margin-bottom: 24px;
+  }
+
+  /* Buttons grid */
+  .buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .prep-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    padding: 14px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+  }
+
+  .prep-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(232, 197, 71, 0.05);
+    transform: translateY(-1px);
+  }
+
+  .prep-btn:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .prep-btn:disabled {
+    cursor: default;
+  }
+
+  .prep-btn.correct {
+    border-color: var(--green);
+    background: rgba(107, 207, 127, 0.1);
+    color: var(--green);
+  }
+
+  .prep-btn.wrong {
+    border-color: var(--red);
+    background: rgba(232, 111, 111, 0.08);
+    color: var(--red);
+    opacity: 0.5;
+  }
+
+  .prep-btn.reveal {
+    border-color: var(--accent);
+    background: rgba(232, 197, 71, 0.08);
+    color: var(--accent);
+  }
+
+  /* Feedback */
+  .feedback {
+    min-height: 70px;
+    margin-top: 4px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    transition: all 0.25s ease;
+    opacity: 0;
+  }
+
+  .feedback.show {
+    opacity: 1;
+  }
+
+  .feedback.correct {
+    background: rgba(107, 207, 127, 0.08);
+    border: 1px solid rgba(107, 207, 127, 0.2);
+    color: var(--ink);
+  }
+
+  .feedback.wrong {
+    background: rgba(232, 111, 111, 0.08);
+    border: 1px solid rgba(232, 111, 111, 0.2);
+    color: var(--ink);
+  }
+
+  .feedback .highlight {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .feedback .sentence {
+    color: var(--ink-dim);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  /* Next button */
+  .next-btn {
+    width: 100%;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 16px;
+    display: none;
+    transition: all 0.15s ease;
+  }
+
+  .next-btn:hover {
+    background: #f0d050;
+    transform: translateY(-1px);
+  }
+
+  .next-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Score row */
+  .score-row {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 20px;
+  }
+
+  .score-item {
+    text-align: center;
+  }
+
+  .score-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+
+  .score-num.g { color: var(--green); }
+  .score-num.r { color: var(--red); }
+  .score-num.d { color: var(--ink-dim); }
+
+  .score-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ink-dim);
+    margin-top: 4px;
+  }
+
+  /* Finished screen */
+  .finished {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .finished h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.5rem;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .finished p {
+    color: var(--ink-dim);
+    font-size: 0.8rem;
+    margin-bottom: 24px;
+  }
+
+  .restart-btn {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 12px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .restart-btn:hover {
+    background: rgba(232, 197, 71, 0.1);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card { animation: fadeIn 0.3s ease; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Verben mit Präpositionen <em>von Doruk Ulaş Işık</em></h1>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="prog-text">0 / 0</span>
+      <span id="prog-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="card" id="quiz-card">
+    <!-- injected by JS -->
+  </div>
+
+  <div class="score-row">
+    <div class="score-item">
+      <div class="score-num g" id="sc-right">0</div>
+      <div class="score-label">Richtig</div>
+    </div>
+    <div class="score-item">
+      <div class="score-num r" id="sc-wrong">0</div>
+      <div class="score-label">Falsch</div>
+    </div>
+    <div class="score-item">
+      <div class="score-num d" id="sc-left">0</div>
+      <div class="score-label">Übrig</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA (orijinal verbs.csv'den birebir) ──────────────────────────────────
+const RAW = `Verb,Preposition,Kasus,Beispielsatz
+abhängen,von,Dativ,"Es hängt ___ dem Wetter ab."
+achten,auf,Akkusativ,"Du musst ___ die Regeln achten."
+anfangen,mit,Dativ,"Wann fängst du ___ der Arbeit an?"
+ankommen,auf,Akkusativ,"Es kommt ___ die richtige Planung an."
+antworten,auf,Akkusativ,"Er antwortet ___ die Frage."
+arbeiten,an,Dativ,"Sie arbeitet ___ einem wichtigen Projekt."
+auffordern,zu,Dativ,"Der Lehrer fordert uns ___ mehr Mitarbeit auf."
+aufhören,mit,Dativ,"Er hört ___ dem Rauchen auf."
+ausgeben,für,Akkusativ,"Ich gebe viel Geld ___ Bücher aus."
+bestehen,aus,Dativ,"Das Team besteht ___ zehn Personen."
+bestehen,auf,Dativ,"Sie besteht ___ ihrer Meinung."
+berichten,über,Akkusativ,"Die Zeitung berichtet ___ den Unfall."
+beschweren,sich über,Akkusativ,"Er beschwert sich ___ den Lärm."
+bitten,um,Akkusativ,"Ich bitte dich ___ Hilfe."
+danken,für,Akkusativ,"Wir danken dir ___ deine Unterstützung."
+denken,an,Akkusativ,"Er denkt oft ___ seine Kindheit."
+diskutieren,über,Akkusativ,"Sie diskutieren ___ Politik."
+einladen,zu,Dativ,"Ich lade dich ___ meiner Party ein."
+empfehlen,für,Akkusativ,"Kannst du ein Hotel ___ unseren Urlaub empfehlen?"
+entscheiden,sich für,Akkusativ,"Sie entscheidet sich ___ das rote Kleid."
+erfahren,von,Dativ,"Ich habe ___ dem Problem erfahren."
+erinnern,sich an,Akkusativ,"Sie erinnert sich ___ den Termin."
+erzählen,von,Dativ,"Er erzählt ___ seiner Reise."
+fragen,nach,Dativ,"Ich frage ___ dem Weg."
+freuen,sich auf,Akkusativ,"Wir freuen uns ___ die Ferien."
+freuen,sich über,Akkusativ,"Er freut sich ___ das Geschenk."
+gehören,zu,Dativ,"Das gehört ___ meinem Job."
+glauben,an,Akkusativ,"Sie glaubt ___ ihre Fähigkeiten."
+gratulieren,zu,Dativ,"Ich gratuliere dir ___ Geburtstag."
+halten,von,Dativ,"Was hältst du ___ diesem Vorschlag?"
+handeln,von,Dativ,"Das Buch handelt ___ einem berühmten Künstler."
+helfen,bei,Dativ,"Kannst du mir ___ den Hausaufgaben helfen?"
+hindern,an,Dativ,"Der Regen hindert uns ___ dem Spaziergang."
+hoffen,auf,Akkusativ,"Er hofft ___ besseres Wetter."
+informieren,über,Akkusativ,"Wir informieren dich ___ die Änderungen."
+interessieren,sich für,Akkusativ,"Sie interessiert sich ___ Kunst."
+kämpfen,für,Akkusativ,"Die Menschen kämpfen ___ ihre Rechte."
+kämpfen,gegen,Akkusativ,"Die Ärzte kämpfen ___ die Krankheit."
+kämpfen,um,Akkusativ,"Die Mannschaft kämpft ___ den Sieg."
+klagen,über,Akkusativ,"Er klagt ___ starke Schmerzen."
+lachen,über,Akkusativ,"Alle lachen ___ den Witz."
+leiden,an,Dativ,"Er leidet ___ starken Kopfschmerzen."
+nachdenken,über,Akkusativ,"Ich denke ___ das Problem nach."
+passen,zu,Dativ,"Das passt ___ deinem Stil."
+protestieren,gegen,Akkusativ,"Die Studenten protestieren ___ die neuen Regeln."
+rechnen,mit,Dativ,"Wir rechnen ___ vielen Gästen."
+reden,mit,Dativ,"Ich rede ___ meinem Chef."
+reden,über,Akkusativ,"Wir reden ___ das neue Projekt."
+riechen,nach,Dativ,"Das Essen riecht ___ Knoblauch."
+schimpfen,über,Akkusativ,"Die Nachbarn schimpfen ___ den Lärm."
+schreiben,an,Akkusativ,"Sie schreibt ___ einem Roman."
+schützen,vor,Dativ,"Die Creme schützt ___ der Sonne."
+sehnen,sich nach,Dativ,"Er sehnt sich ___ Ruhe."
+sorgen,für,Akkusativ,"Die Eltern sorgen ___ ihre Kinder."
+sprechen,mit,Dativ,"Er spricht ___ seinem Lehrer."
+sprechen,über,Akkusativ,"Wir sprechen ___ das Problem."
+sterben,an,Dativ,"Viele Menschen sterben ___ dieser Krankheit."
+streiten,sich mit,Dativ,"Sie streitet sich ___ ihrem Bruder."
+streiten,sich über,Akkusativ,"Wir streiten uns ___ Geld."
+suchen,nach,Dativ,"Ich suche ___ meinem Schlüssel."
+teilnehmen,an,Dativ,"Sie nimmt ___ dem Kurs teil."
+telefonieren,mit,Dativ,"Ich telefoniere ___ meiner Mutter."
+träumen,von,Dativ,"Er träumt ___ einem Haus am Meer."
+überzeugen,von,Dativ,"Sie überzeugt ihn ___ ihrer Idee."
+vergleichen,mit,Dativ,"Man vergleicht ihn ___ seinem Vater."
+verzichten,auf,Akkusativ,"Ich verzichte ___ Zucker."
+warnen,vor,Dativ,"Der Arzt warnt ___ zu viel Stress."
+warten,auf,Akkusativ,"Wir warten ___ den Zug."
+zweifeln,an,Dativ,"Sie zweifelt ___ seiner Ehrlichkeit."`;
+
+// ── CSV parse (aynı Python mantığı) ───────────────────────────────────────
+function parseCSV(raw) {
+  const lines = raw.trim().split('\n');
+  const headers = lines[0].split(',');
+  return lines.slice(1).map(line => {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let c of line) {
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cols.push(cur); cur = ''; }
+      else cur += c;
+    }
+    cols.push(cur);
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (cols[i] || '').trim());
+    return obj;
+  });
+}
+
+// ── Tüm preposition'ları çıkar (buton seçenekleri için) ───────────────────
+function uniquePreps(lst) {
+  const s = new Set(lst.map(r => r.Preposition));
+  return [...s].sort();
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── State ──────────────────────────────────────────────────────────────────
+let allVerbs, lst, allPreps;
+let current, attempt, answered;
+let scoreRight, scoreWrong;
+let total;
+
+function init() {
+  allVerbs = parseCSV(RAW);
+  lst = shuffle([...allVerbs]);
+  allPreps = uniquePreps(allVerbs);
+  scoreRight = 0; scoreWrong = 0;
+  total = lst.length;
+  attempt = 1; answered = false;
+  renderNext();
+}
+
+// ── Orijinal Python mantığı (birebir port) ─────────────────────────────────
+// while lst → her soru için:
+//   1. fiili göster
+//   2. kullanıcı cevap verir
+//   3. doğruysa → tebrik + örnek cümle → lst'den sil
+//   4. yanlışsa → ikinci şans
+//     a. 2. cevap doğruysa → tebrik + örnek cümle
+//     b. 2. cevap yanlışsa → cevap göster + örnek cümle
+//     → lst'den sil (her iki durumda)
+
+function renderNext() {
+  updateScore();
+  if (lst.length === 0) { renderFinished(); return; }
+
+  current = lst[0];
+  attempt = 1;
+  answered = false;
+
+  // Seçenekleri oluştur: doğru cevap + rastgele 5 yanlış
+  const wrong = shuffle(allPreps.filter(p => p !== current.Preposition)).slice(0, 5);
+  const options = shuffle([current.Preposition, ...wrong]);
+
+  const done = total - lst.length;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-text').textContent = done + ' / ' + total;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('sc-left').textContent = lst.length;
+
+  const card = document.getElementById('quiz-card');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'fadeIn 0.3s ease';
+
+  card.innerHTML = `
+    <span class="attempt-badge" id="attempt-badge">1. Versuch</span>
+    <div class="verb-label">Verb</div>
+    <div class="verb-main">${current.Verb}</div>
+    <div class="kasus-tag">${current.Kasus}</div>
+    <div class="buttons-grid" id="btn-grid">
+      ${options.map(p => `<button class="prep-btn" onclick="handleAnswer('${p}')">${p}</button>`).join('')}
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="next-btn" onclick="advance()">Weiter →</button>
+  `;
+}
+
+function handleAnswer(chosen) {
+  if (answered) return;
+
+  const correct = current.Preposition;
+  const feedback = document.getElementById('feedback');
+  const nextBtn = document.getElementById('next-btn');
+  const badge = document.getElementById('attempt-badge');
+  const buttons = document.querySelectorAll('.prep-btn');
+
+  if (chosen === correct) {
+    // ── DOĞRU ──
+    answered = true;
+    if (attempt === 1) scoreRight++;
+    else scoreWrong++; // 2. denemede doğru = yanlış sayılır (orijinal gibi)
+
+    buttons.forEach(b => {
+      b.disabled = true;
+      if (b.textContent === correct) b.classList.add('correct');
+    });
+
+    const sentence = current.Beispielsatz.replace('___', `<span class="highlight">${correct}</span>`);
+    feedback.className = 'feedback correct show';
+    feedback.innerHTML = `
+      ✓ Richtig! <span class="highlight">${current.Verb} ${correct}</span> (${current.Kasus})
+      <div class="sentence">${sentence}</div>
+    `;
+    nextBtn.style.display = 'block';
+    updateScore();
+
+  } else {
+    // ── YANLIŞ ──
+    if (attempt === 1) {
+      // İlk deneme yanlış → iptal et, ikinci şans
+      attempt = 2;
+      badge.textContent = '2. Versuch';
+      badge.className = 'attempt-badge second';
+
+      // Yanlış butonu gri yap
+      buttons.forEach(b => { if (b.textContent === chosen) b.classList.add('wrong'); });
+
+      feedback.className = 'feedback wrong show';
+      feedback.innerHTML = `✗ Falsch! <span style="color:var(--red)">${current.Verb} ${chosen}</span> — Versuche es nochmal.`;
+
+    } else {
+      // İkinci deneme de yanlış → cevabı göster
+      answered = true;
+      scoreWrong++;
+
+      buttons.forEach(b => {
+        b.disabled = true;
+        if (b.textContent === correct) b.classList.add('reveal');
+        else if (b.textContent === chosen) b.classList.add('wrong');
+      });
+
+      const sentence = current.Beispielsatz.replace('___', `<span class="highlight">${correct}</span>`);
+      feedback.className = 'feedback wrong show';
+      feedback.innerHTML = `
+        ✗ Falsch! Die richtige Antwort: <span class="highlight">${current.Verb} ${correct}</span> (${current.Kasus})
+        <div class="sentence">${sentence}</div>
+      `;
+      nextBtn.style.display = 'block';
+      updateScore();
+    }
+  }
+}
+
+function advance() {
+  // lst.remove(line) — orijinal mantık
+  lst.shift();
+  renderNext();
+}
+
+function updateScore() {
+  document.getElementById('sc-right').textContent = scoreRight;
+  document.getElementById('sc-wrong').textContent = scoreWrong;
+  document.getElementById('sc-left').textContent = lst.length;
+}
+
+function renderFinished() {
+  const pct = Math.round((scoreRight / total) * 100);
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-text').textContent = total + ' / ' + total;
+  document.getElementById('prog-pct').textContent = '100%';
+
+  document.getElementById('quiz-card').innerHTML = `
+    <div class="finished">
+      <h2>Fertig! 🎉</h2>
+      <p>Komm morgen zurück!</p>
+      <div class="score-row" style="margin-bottom:28px; justify-content:center; gap:40px">
+        <div class="score-item">
+          <div class="score-num g">${scoreRight}</div>
+          <div class="score-label">Richtig</div>
+        </div>
+        <div class="score-item">
+          <div class="score-num r">${scoreWrong}</div>
+          <div class="score-label">Falsch</div>
+        </div>
+        <div class="score-item">
+          <div class="score-num d">${pct}%</div>
+          <div class="score-label">Erfolg</div>
+        </div>
+      </div>
+      <button class="restart-btn" onclick="init()">Nochmal spielen</button>
+    </div>
+  `;
+}
+
+// ── Start ──────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
