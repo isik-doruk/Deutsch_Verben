@@ -15,7 +15,7 @@ Es funktioniert jetzt auch bei allen Mobilgeräten. Getestet und überprüft.
 
 fügte meinen eigenen Namen unter den Titel hinzu.
 
-Ein großes Dankeschön an Mustafa Ege Sevik und Karan Ali Kılınç, da sie das Programm getestet
+Ein großes Dankeschön an Mustafa Ege Sevik und Karan Ali Kılıç, da sie das Programm getestet
 und Rückmeldung gegeben haben.
 
 -----------------------------------------------------------------------------------------------------------------
