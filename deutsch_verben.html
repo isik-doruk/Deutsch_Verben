@@ -401,7 +401,7 @@
 </div>
 
 <script>
-// ── DATA (orijinal verbs.csv'den birebir) ──────────────────────────────────
+// ── DATA aus (verbs.csv)
 const RAW = `Verb,Preposition,Kasus,Beispielsatz
 abhängen,von,Dativ,"Es hängt ___ dem Wetter ab."
 achten,auf,Akkusativ,"Du musst ___ die Regeln achten."
@@ -473,7 +473,7 @@ warnen,vor,Dativ,"Der Arzt warnt ___ zu viel Stress."
 warten,auf,Akkusativ,"Wir warten ___ den Zug."
 zweifeln,an,Dativ,"Sie zweifelt ___ seiner Ehrlichkeit."`;
 
-// ── CSV parse (aynı Python mantığı) ───────────────────────────────────────
+//  CSV 
 function parseCSV(raw) {
   const lines = raw.trim().split('\n');
   const headers = lines[0].split(',');
@@ -492,7 +492,7 @@ function parseCSV(raw) {
   });
 }
 
-// ── Tüm preposition'ları çıkar (buton seçenekleri için) ───────────────────
+
 function uniquePreps(lst) {
   const s = new Set(lst.map(r => r.Preposition));
   return [...s].sort();
@@ -507,7 +507,7 @@ function shuffle(arr) {
   return a;
 }
 
-// ── State ──────────────────────────────────────────────────────────────────
+
 let allVerbs, lst, allPreps;
 let current, attempt, answered;
 let scoreRight, scoreWrong;
@@ -523,15 +523,7 @@ function init() {
   renderNext();
 }
 
-// ── Orijinal Python mantığı (birebir port) ─────────────────────────────────
-// while lst → her soru için:
-//   1. fiili göster
-//   2. kullanıcı cevap verir
-//   3. doğruysa → tebrik + örnek cümle → lst'den sil
-//   4. yanlışsa → ikinci şans
-//     a. 2. cevap doğruysa → tebrik + örnek cümle
-//     b. 2. cevap yanlışsa → cevap göster + örnek cümle
-//     → lst'den sil (her iki durumda)
+
 
 function renderNext() {
   updateScore();
@@ -541,7 +533,7 @@ function renderNext() {
   attempt = 1;
   answered = false;
 
-  // Seçenekleri oluştur: doğru cevap + rastgele 5 yanlış
+  // falsche und richtige Antworten
   const wrong = shuffle(allPreps.filter(p => p !== current.Preposition)).slice(0, 5);
   const options = shuffle([current.Preposition, ...wrong]);
 
@@ -580,7 +572,7 @@ function handleAnswer(chosen) {
   const buttons = document.querySelectorAll('.prep-btn');
 
   if (chosen === correct) {
-    // ── DOĞRU ──
+    // richtig
     answered = true;
     if (attempt === 1) scoreRight++;
     else scoreWrong++; // 2. denemede doğru = yanlış sayılır (orijinal gibi)
@@ -600,21 +592,21 @@ function handleAnswer(chosen) {
     updateScore();
 
   } else {
-    // ── YANLIŞ ──
+    // falsch
     if (attempt === 1) {
-      // İlk deneme yanlış → iptal et, ikinci şans
+      // erster Versuch falsch
       attempt = 2;
       badge.textContent = '2. Versuch';
       badge.className = 'attempt-badge second';
 
-      // Yanlış butonu gri yap
+      
       buttons.forEach(b => { if (b.textContent === chosen) b.classList.add('wrong'); });
 
       feedback.className = 'feedback wrong show';
       feedback.innerHTML = `✗ Falsch! <span style="color:var(--red)">${current.Verb} ${chosen}</span> — Versuche es nochmal.`;
 
     } else {
-      // İkinci deneme de yanlış → cevabı göster
+      // zeig die richtige Antwort
       answered = true;
       scoreWrong++;
 
@@ -677,7 +669,7 @@ function renderFinished() {
   `;
 }
 
-// ── Start ──────────────────────────────────────────────────────────────────
+// anfangen
 init();
 </script>
 </body>
